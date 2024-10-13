@@ -1,0 +1,42 @@
+name: classic to yaml
+trigger:
+ - main
+
+variable: 
+     gideon: 54321
+stages:
+ - stage: Build
+   - job: Job_1
+  displayName: Agent job 1
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - checkout: self
+    fetchDepth: 1
+  - task: Npm@1
+    displayName: npm install
+    inputs:
+      verbose: false
+  - task: Npm@1
+    displayName: npm build
+    inputs:
+      command: custom
+      verbose: false
+      customCommand: run build
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: drop'
+    inputs:
+      PathtoPublish: build
+
+
+
+ - tage: Deploy
+   jobs:
+    task: AzureRmWebAppDeployment@4
+    displayName: 'Azure App Service Deploy: class02'
+    inputs:
+      ConnectedServiceName: var.gideon
+      WebAppKind: webAppLinux
+      WebAppName: class022
+      Package: $(System.DefaultWorkingDirectory)/build
+      RuntimeStack: STATICSITE|1.0
